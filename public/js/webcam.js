@@ -79,6 +79,9 @@ function capturePhoto() {
     preview.src = imageData;
     preview.style.display = 'block';
 
+    const placeholder = document.getElementById('photo-placeholder');
+    if (placeholder) placeholder.style.display = 'none';
+
     // Store in hidden input for form submission
     photoInput.value = imageData;
 
@@ -91,6 +94,8 @@ function capturePhoto() {
 
 function retakePhoto() {
     document.getElementById('photo-preview').style.display = 'none';
+    const placeholder = document.getElementById('photo-placeholder');
+    if (placeholder) placeholder.style.display = 'block';
     document.getElementById('photo-data').value = '';
     startCamera();
 }

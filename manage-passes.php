@@ -56,8 +56,11 @@ if (strlen($_SESSION['admin_id'] == 0)) {
                             <a href="view-pass-detail.php?id=<?php echo $row['id'];?>" class="btn btn-primary" style="margin-right: 0.5rem;">
                                 <i class="fas fa-eye"></i> View
                             </a>
-                            <a href="edit-pass-detail.php?id=<?php echo $row['id'];?>" class="btn btn-secondary">
+                            <a href="edit-pass-detail.php?id=<?php echo $row['id'];?>" class="btn btn-secondary" style="margin-right: 0.5rem;">
                                 <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a href="delete-pass.php?id=<?php echo $row['id'];?>" class="btn btn-danger" onclick="return confirm('Do you really want to delete this pass?');">
+                                <i class="fas fa-trash"></i> Delete
                             </a>
                         </td>
                     </tr>

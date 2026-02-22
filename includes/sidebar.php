@@ -1,8 +1,15 @@
 <!-- includes/sidebar.php -->
 <div class="sidebar">
     <div class="sidebar-header">
-        <h3>GPMS</h3>
-        <small>Admin Panel</small>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3>GPMS</h3>
+                <small>Admin Panel</small>
+            </div>
+            <button id="sidebarCollapse" class="btn btn-link text-white p-2" title="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
     </div>
     <ul class="nav flex-column p-3">
         <li class="nav-item">

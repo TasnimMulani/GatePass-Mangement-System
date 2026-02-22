@@ -2,8 +2,15 @@
 <div class="dashboard-wrapper">
     <aside class="sidebar">
         <div class="sidebar-header">
-            <h2>GPMS</h2>
-            <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;">AI-Driven System</p>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>GPMS</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;">AI-Driven System</p>
+                </div>
+                <button id="sidebarCollapse" class="btn btn-link text-white p-2" title="Toggle Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
         </div>
         <nav class="sidebar-nav">
             <a href="dashboard.php" class="sidebar-link <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">

@@ -99,24 +99,27 @@ if (strlen($_SESSION['admin_id'] == 0)) {
         <h3 class="card-title"><i class="fas fa-camera"></i> Visitor Photo</h3>
     </div>
     <div class="card-body">
-        <div style="display: flex; gap: 1rem; align-items: start;">
-            <div style="flex: 1;">
-                <button type="button" class="btn btn-primary" onclick="startCamera()">
-                    <i class="fas fa-camera"></i> Capture Photo
+        <div class="stats-grid" style="margin-bottom: 0; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+            <div class="glass-inset" style="padding: var(--spacing-md); border-radius: var(--radius-md); background: rgba(0,0,0,0.2);">
+                <button type="button" class="btn btn-primary w-100" onclick="startCamera()">
+                    <i class="fas fa-camera"></i> Start Camera
                 </button>
-                <div id="camera-section" style="display: none; margin-top: 1rem;">
-                    <video id="webcam-video" autoplay style="width: 100%; max-width: 400px; border-radius: 8px;"></video>
+                <div id="camera-section" style="display: none; margin-top: 1rem; text-align: center;">
+                    <video id="webcam-video" autoplay style="width: 100%; max-width: 100%; border-radius: 8px; border: 1px solid var(--glass-border);"></video>
                     <canvas id="webcam-canvas" style="display: none;"></canvas>
-                    <br>
-                    <button type="button" class="btn btn-success" id="capture-photo-btn" onclick="capturePhoto()" disabled>
+                    <button type="button" class="btn btn-success mt-3 w-100" id="capture-photo-btn" onclick="capturePhoto()" disabled>
                         <i class="fas fa-camera"></i> Take Photo
                     </button>
                 </div>
             </div>
-            <div style="flex: 1;">
-                <img id="photo-preview" src="" alt="Photo Preview" style="display: none; max-width: 300px; border-radius: 8px; border: 2px solid var(--accent-primary);">
-                <div id="retake-section" style="display: none; margin-top: 1rem;">
-                    <button type="button" class="btn btn-secondary" onclick="retakePhoto()">
+            <div class="glass-inset" style="padding: var(--spacing-md); border-radius: var(--radius-md); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;">
+                <img id="photo-preview" src="" alt="Photo Preview" style="display: none; max-width: 100%; max-height: 250px; border-radius: 8px; border: 2px solid var(--accent-primary); box-shadow: var(--glass-shadow);">
+                <div id="photo-placeholder" style="color: var(--text-secondary); text-align: center;">
+                    <i class="fas fa-user-circle" style="font-size: 5rem; opacity: 0.2; display: block; margin-bottom: 1rem;"></i>
+                    <p>Photo Preview</p>
+                </div>
+                <div id="retake-section" style="display: none; margin-top: 1rem; width: 100%;">
+                    <button type="button" class="btn btn-secondary w-100" onclick="retakePhoto()">
                         <i class="fas fa-redo"></i> Retake Photo
                     </button>
                 </div>
@@ -133,9 +136,8 @@ if (strlen($_SESSION['admin_id'] == 0)) {
     <input type="file" id="id-card-upload" accept="image/*" style="display: none;">
 </div>
 
-<div id="ocr-loading" style="display: none;" class="alert alert-info">
+<div id="ocr-loading" style="display: none; margin-bottom: var(--spacing-md);" class="alert alert-info">
     <span class="loading"></span> Processing ID card...
-</div>
 </div>
 
 <div id="ocr-result" style="display: none;"></div>
