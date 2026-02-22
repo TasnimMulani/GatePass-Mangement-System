@@ -1,33 +1,48 @@
 // Main JavaScript for GPMS - AI-Driven Gatepass Management System
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Sidebar Toggle for Mobile
+document.addEventListener('DOMContentLoaded', function () {
+    // Sidebar Toggle for Mobile & Desktop
     const sidebarToggle = document.getElementById('sidebarToggle');
+    const mobileToggle = document.getElementById('mobileToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
     const sidebar = document.querySelector('.sidebar');
-    
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-        });
+    const mainContent = document.querySelector('.main-content');
+
+    function toggleSidebar() {
+        sidebar.classList.toggle('active');
+        if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
+        if (mainContent) mainContent.classList.toggle('sidebar-active');
     }
-    
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', toggleSidebar);
+    }
+
+    if (mobileToggle) {
+        mobileToggle.addEventListener('click', toggleSidebar);
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+    }
+
     // Active Navigation Link
     const currentPath = window.location.pathname;
     const navLinks = document.querySelectorAll('.sidebar-nav a');
-    
+
     navLinks.forEach(link => {
         if (link.getAttribute('href') === currentPath.split('/').pop()) {
             link.classList.add('active');
         }
     });
-    
+
     // Form Validation Enhancement
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             const requiredFields = form.querySelectorAll('[required]');
             let isValid = true;
-            
+
             requiredFields.forEach(field => {
                 if (!field.value.trim()) {
                     isValid = false;
@@ -36,16 +51,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     field.style.borderColor = '';
                 }
             });
-            
+
             if (!isValid) {
                 e.preventDefault();
                 showNotification('Please fill in all required fields', 'danger');
             }
         });
     });
-    
+
     // Notification System
-    window.showNotification = function(message, type = 'info') {
+    window.showNotification = function (message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `alert alert-${type}`;
         notification.textContent = message;
@@ -55,18 +70,18 @@ document.addEventListener('DOMContentLoaded', function() {
         notification.style.zIndex = '1000';
         notification.style.minWidth = '300px';
         notification.style.animation = 'slideIn 0.4s ease';
-        
+
         document.body.appendChild(notification);
-        
+
         setTimeout(() => {
             notification.style.animation = 'fadeOut 0.4s ease';
             setTimeout(() => notification.remove(), 400);
         }, 3000);
     };
-    
+
     // Smooth Scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+        anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
@@ -74,19 +89,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Table Row Click to View Details
     const tableRows = document.querySelectorAll('tbody tr[data-id]');
     tableRows.forEach(row => {
         row.style.cursor = 'pointer';
-        row.addEventListener('click', function() {
+        row.addEventListener('click', function () {
             const id = this.getAttribute('data-id');
             if (id) {
                 window.location.href = `view-pass-detail.php?id=${id}`;
             }
         });
     });
-    
+
     // Animated Counter for Stats
     function animateCounter(element, target, duration = 1000) {
         let current = 0;
@@ -100,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
             element.textContent = Math.floor(current);
         }, 16);
     }
-    
+
     // Animate stat cards on page load
     const statValues = document.querySelectorAll('.stat-value');
     statValues.forEach(stat => {
@@ -110,17 +125,17 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => animateCounter(stat, target), 200);
         }
     });
-    
+
     // Delete Confirmation
     const deleteButtons = document.querySelectorAll('[data-action="delete"]');
     deleteButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
+        button.addEventListener('click', function (e) {
             if (!confirm('Are you sure you want to delete this item?')) {
                 e.preventDefault();
             }
         });
     });
-    
+
     // Auto-hide alerts after 5 seconds
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(alert => {

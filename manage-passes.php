@@ -11,8 +11,24 @@ if (strlen($_SESSION['admin_id'] == 0)) {
 <?php include 'app/includes/sidebar.php'; ?>
 
 <div class="page-header">
-    <h1 class="page-title">Manage Passes</h1>
-    <p class="page-subtitle">View, edit, and manage all gate passes</p>
+    <?php
+    $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
+    $title = "Manage Passes";
+    $subtitle = "View, edit, and manage all gate passes";
+    $where = "";
+
+    if ($filter == 'today') {
+        $title = "Today's Passes";
+        $subtitle = "Passes created on " . date('M d, Y');
+        $where = "WHERE DATE(pass_creation_date) = CURDATE()";
+    } elseif ($filter == 'week') {
+        $title = "Weekly Passes";
+        $subtitle = "Passes created in the last 7 days";
+        $where = "WHERE DATE(pass_creation_date) >= DATE(NOW()) - INTERVAL 7 DAY";
+    }
+    ?>
+    <h1 class="page-title"><?php echo $title; ?></h1>
+    <p class="page-subtitle"><?php echo $subtitle; ?></p>
 </div>
 
 <div class="card">
@@ -36,7 +52,7 @@ if (strlen($_SESSION['admin_id'] == 0)) {
                 </thead>
                 <tbody>
                 <?php
-                    $ret = mysqli_query($conn, "SELECT * FROM passes ORDER BY pass_creation_date DESC");
+                    $ret = mysqli_query($conn, "SELECT * FROM passes $where ORDER BY pass_creation_date DESC");
                     $cnt = 1;
                     while ($row = mysqli_fetch_array($ret)) {
                 ?>

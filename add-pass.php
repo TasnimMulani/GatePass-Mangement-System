@@ -90,57 +90,31 @@ if (strlen($_SESSION['admin_id'] == 0)) {
 
 <div class="page-header">
     <h1 class="page-title">Add Gate Pass</h1>
-    <p class="page-subtitle">Capture photo, scan ID with AI-powered OCR, or enter details manually</p>
+    <p class="page-subtitle">Scan ID card with AI-powered OCR to auto-fill details</p>
 </div>
 
-<!-- Photo Capture Section -->
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-camera"></i> Visitor Photo</h3>
-    </div>
+<!-- OCR Upload Section (Primary Focus) -->
+<div class="card mb-4" style="border: 2px dashed var(--accent-primary); background: rgba(99, 102, 241, 0.05);">
     <div class="card-body">
-        <div class="stats-grid" style="margin-bottom: 0; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-            <div class="glass-inset" style="padding: var(--spacing-md); border-radius: var(--radius-md); background: rgba(0,0,0,0.2);">
-                <button type="button" class="btn btn-primary w-100" onclick="startCamera()">
-                    <i class="fas fa-camera"></i> Start Camera
+        <div class="ocr-upload-section" id="ocr-upload-section" style="margin-bottom: 0; border: none; background: transparent;">
+            <i class="fas fa-id-card" style="font-size: 4rem; color: var(--accent-primary); margin-bottom: 1.5rem;"></i>
+            <h2 class="h3 mb-3">Scan Identity Document</h2>
+            <p class="text-secondary mb-4">Upload or drag & drop Aadhar, PAN, Voter ID, or Driving License for instant auto-fill</p>
+            <div class="d-flex justify-content-center" style="gap: 1rem;">
+                <button type="button" class="btn btn-primary btn-lg">
+                    <i class="fas fa-upload"></i> Choose Image
                 </button>
-                <div id="camera-section" style="display: none; margin-top: 1rem; text-align: center;">
-                    <video id="webcam-video" autoplay style="width: 100%; max-width: 100%; border-radius: 8px; border: 1px solid var(--glass-border);"></video>
-                    <canvas id="webcam-canvas" style="display: none;"></canvas>
-                    <button type="button" class="btn btn-success mt-3 w-100" id="capture-photo-btn" onclick="capturePhoto()" disabled>
-                        <i class="fas fa-camera"></i> Take Photo
-                    </button>
-                </div>
             </div>
-            <div class="glass-inset" style="padding: var(--spacing-md); border-radius: var(--radius-md); background: rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;">
-                <img id="photo-preview" src="" alt="Photo Preview" style="display: none; max-width: 100%; max-height: 250px; border-radius: 8px; border: 2px solid var(--accent-primary); box-shadow: var(--glass-shadow);">
-                <div id="photo-placeholder" style="color: var(--text-secondary); text-align: center;">
-                    <i class="fas fa-user-circle" style="font-size: 5rem; opacity: 0.2; display: block; margin-bottom: 1rem;"></i>
-                    <p>Photo Preview</p>
-                </div>
-                <div id="retake-section" style="display: none; margin-top: 1rem; width: 100%;">
-                    <button type="button" class="btn btn-secondary w-100" onclick="retakePhoto()">
-                        <i class="fas fa-redo"></i> Retake Photo
-                    </button>
-                </div>
-            </div>
+            <input type="file" id="id-card-upload" accept="image/*" style="display: none;">
         </div>
     </div>
 </div>
 
-<!-- OCR Upload Section -->
-<div class="ocr-upload-section" id="ocr-upload-section">
-    <i class="fas fa-id-card"></i>
-    <h4>Scan ID Card (AI-Powered OCR)</h4>
-    <p>Click or drag & drop an ID card image to auto-fill details</p>
-    <input type="file" id="id-card-upload" accept="image/*" style="display: none;">
-</div>
-
 <div id="ocr-loading" style="display: none; margin-bottom: var(--spacing-md);" class="alert alert-info">
-    <span class="loading"></span> Processing ID card...
+    <span class="loading"></span> <strong id="ocr-status-text">Processing ID card with AI...</strong>
 </div>
 
-<div id="ocr-result" style="display: none;"></div>
+<div id="ocr-result" style="margin-bottom: var(--spacing-md);"></div>
 
 <!-- Pass Details Form -->
 <div class="card">
@@ -165,11 +139,11 @@ if (strlen($_SESSION['admin_id'] == 0)) {
                 </div>
                 <div class="form-group">
                     <label for="identity_type" class="form-label">Identity Type *</label>
-                    <select class="form-control" name="identity_type" required>
+                    <select class="form-control" id="identity_type" name="identity_type" required>
                         <option value="">Choose Identity Type</option>
-                        <option value="Voter Card">Voter Card</option>
+                        <option value="Voter ID">Voter ID</option>
                         <option value="PAN Card">PAN Card</option>
-                        <option value="Adhar Card">Aadhaar Card</option>
+                        <option value="Aadhar Card">Aadhaar Card</option>
                         <option value="Driving License">Driving License</option>
                         <option value="Passport">Passport</option>
                     </select>
@@ -215,16 +189,6 @@ if (strlen($_SESSION['admin_id'] == 0)) {
 <!-- Tesseract.js for OCR -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 <script src="public/js/ocr.js"></script>
-<script src="public/js/webcam.js"></script>
-
-<script>
-// Update retake section visibility when photo is captured
-const originalCapturePhoto = window.capturePhoto;
-window.capturePhoto = function() {
-    originalCapturePhoto();
-    document.getElementById('retake-section').style.display = 'block';
-};
-</script>
 
 <?php include 'app/includes/footer.php'; ?>
 <?php } ?>

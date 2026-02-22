@@ -11,3 +11,10 @@
     <link rel="stylesheet" href="public/css/style.css">
 </head>
 <body>
+    <!-- Mobile Toggle Button -->
+    <button id="mobileToggle" class="mobile-toggle btn">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Sidebar Overlay for Mobile -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>

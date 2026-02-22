@@ -69,40 +69,64 @@ $peakHours = $aiInsights->getPeakHours();
     <?php endif; ?>
 </div>
 
-<!-- Stats Cards -->
+<!-- Stats Cards & Filters -->
+<div class="card mb-4" style="background: var(--glass-bg); border: 2px solid var(--accent-primary);">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 1rem;">
+            <div>
+                <h3 class="mb-0"><i class="fas fa-calendar-alt"></i> Date Range</h3>
+                <p class="mb-0 text-secondary">Filter analytics by date</p>
+            </div>
+            <div class="d-flex align-items-center" style="gap: 1rem;">
+                <div class="form-group mb-0">
+                    <label class="form-label mb-1">From</label>
+                    <input type="date" id="stats-start-date" class="form-control" value="<?php echo date('Y-m-d', strtotime('-13 days')); ?>">
+                </div>
+                <div class="form-group mb-0">
+                    <label class="form-label mb-1">To</label>
+                    <input type="date" id="stats-end-date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
+                </div>
+                <button type="button" class="btn btn-primary" style="margin-top: 1.5rem;" onclick="updateDashboard()">
+                    <i class="fas fa-sync-alt"></i> Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="stats-grid">
     <!-- Total Passes Card -->
-    <div class="stat-card">
+    <a href="manage-passes.php" class="stat-card" style="text-decoration: none;">
         <div class="stat-label">Total Passes</div>
         <?php 
             $query = mysqli_query($conn, "SELECT id FROM passes");
             $count_total_passes = mysqli_num_rows($query);
         ?>
-        <div class="stat-value"><?php echo $count_total_passes; ?></div>
+        <div class="stat-value" id="stat-total"><?php echo $count_total_passes; ?></div>
         <i class="fas fa-id-card-alt stat-icon"></i>
-    </div>
+    </a>
 
     <!-- Passes Created Today Card -->
-    <div class="stat-card">
+    <a href="manage-passes.php?filter=today" class="stat-card" style="text-decoration: none;">
         <div class="stat-label">Passes Created Today</div>
         <?php 
             $query_today = mysqli_query($conn, "SELECT id FROM passes where date(pass_creation_date) = CURDATE()");
             $count_today_passes = mysqli_num_rows($query_today);
         ?>
-        <div class="stat-value"><?php echo $count_today_passes; ?></div>
+        <div class="stat-value" id="stat-today"><?php echo $count_today_passes; ?></div>
         <i class="fas fa-calendar-day stat-icon"></i>
-    </div>
+    </a>
     
     <!-- Passes in Last 7 Days Card -->
-    <div class="stat-card">
+    <a href="manage-passes.php?filter=week" class="stat-card" style="text-decoration: none;">
         <div class="stat-label">Passes in Last 7 days</div>
         <?php 
             $query_week = mysqli_query($conn, "SELECT id FROM passes where date(pass_creation_date) >= DATE(NOW()) - INTERVAL 7 DAY");
             $count_week_passes = mysqli_num_rows($query_week);
         ?>
-        <div class="stat-value"><?php echo $count_week_passes; ?></div>
+        <div class="stat-value" id="stat-week"><?php echo $count_week_passes; ?></div>
         <i class="fas fa-calendar-week stat-icon"></i>
-    </div>
+    </a>
 </div>
 
 <!-- Recent Passes -->
@@ -157,132 +181,175 @@ $peakHours = $aiInsights->getPeakHours();
 </div>
 
 <div class="stats-grid">
-    <div class="card" style="grid-column: span 2;">
+    <div class="card" style="grid-column: span 2; position: relative;">
         <div class="card-header">
-            <h3 class="card-title">7-Day Traffic Trend</h3>
+            <h3 class="card-title">14-Day Category Trends</h3>
         </div>
         <div class="card-body">
-            <canvas id="trafficTrendChart"></canvas>
+            <canvas id="categoryTrendsChart"></canvas>
+            <div id="noData-trends" class="empty-state" style="display: none;">No Data Found</div>
+        </div>
+    </div>
+    
+    <div class="card" style="position: relative;">
+        <div class="card-header">
+            <h3 class="card-title">Hourly Check-in Heatmap</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="checkinHeatmapChart"></canvas>
+            <div id="noData-heatmap" class="empty-state" style="display: none;">No Data Found</div>
         </div>
     </div>
     
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Category Distribution</h3>
+            <h3 class="card-title">Current Category Mix</h3>
         </div>
         <div class="card-body">
             <canvas id="categoryChart"></canvas>
         </div>
     </div>
-    
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Peak Hours</h3>
-        </div>
-        <div class="card-body">
-            <canvas id="peakHoursChart"></canvas>
-        </div>
-    </div>
 </div>
+
+<style>
+.empty-state {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.7);
+    padding: 1rem 2rem;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-weight: 600;
+    z-index: 5;
+}
+</style>
 
 <!-- Chart.js Library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// Traffic Trend Chart (Last 7 days)
-<?php
-$trafficData = [];
-for ($i = 6; $i >= 0; $i--) {
-    $date = date('Y-m-d', strtotime("-$i days"));
-    $query = mysqli_query($conn, "SELECT COUNT(*) as count FROM passes WHERE DATE(pass_creation_date) = '$date'");
-    $result = mysqli_fetch_assoc($query);
-    $trafficData[] = [
-        'date' => date('M d', strtotime($date)),
-        'count' => (int)$result['count']
-    ];
+let trendsChart, heatmapChart, categoryChart;
+
+function initCharts() {
+    // 1. Stacked Category Trends
+    const trendsCtx = document.getElementById('categoryTrendsChart').getContext('2d');
+    trendsChart = new Chart(trendsCtx, {
+        type: 'bar',
+        data: { labels: [], datasets: [] },
+        options: {
+            responsive: true,
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+            },
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // 2. Heatmap-style Hourly Bar Chart
+    const heatmapCtx = document.getElementById('checkinHeatmapChart').getContext('2d');
+    heatmapChart = new Chart(heatmapCtx, {
+        type: 'bar',
+        data: {
+            labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+            datasets: [{
+                label: 'Check-ins',
+                data: [],
+                backgroundColor: (context) => {
+                    const value = context.dataset.data[context.dataIndex];
+                    const alpha = Math.min(0.2 + (value / 10), 0.9);
+                    return `rgba(99, 102, 241, ${alpha})`;
+                }
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+    });
+
+    // 3. Category Distribution (Doughnut)
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    categoryChart = new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: { labels: [], datasets: [{ data: [] }] },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
 }
-?>
-const trafficCtx = document.getElementById('trafficTrendChart').getContext('2d');
-new Chart(trafficCtx, {
-    type: 'line',
-    data: {
-        labels: <?php echo json_encode(array_column($trafficData, 'date')); ?>,
-        datasets: [{
-            label: 'Passes Created',
-            data: <?php echo json_encode(array_column($trafficData, 'count')); ?>,
-            borderColor: 'rgb(99, 102, 241)',
-            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-            tension: 0.3,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: { precision: 0 }
-            }
-        }
-    }
-});
 
-// Category Distribution Chart
-<?php
-$categoryData = $aiInsights->getCategoryDistribution();
-?>
-const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-new Chart(categoryCtx, {
-    type: 'doughnut',
-    data: {
-        labels: <?php echo json_encode(array_column($categoryData, 'category')); ?>,
-        datasets: [{
-            data: <?php echo json_encode(array_column($categoryData, 'count')); ?>,
-            backgroundColor: [
-                'rgba(99, 102, 241, 0.8)',
-                'rgba(139, 92, 246, 0.8)',
-                'rgba(236, 72, 153, 0.8)',
-                'rgba(251, 146, 60, 0.8)',
-                'rgba(34, 197, 94, 0.8)'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
-    }
-});
+async function updateDashboard() {
+    const start = document.getElementById('stats-start-date').value;
+    const end = document.getElementById('stats-end-date').value;
+    
+    try {
+        const response = await fetch(`app/api/dashboard_stats.php?start_date=${start}&end_date=${end}`);
+        const data = await response.json();
+        
+        // Update Stats
+        document.getElementById('stat-total').textContent = data.stats.total;
+        document.getElementById('stat-today').textContent = data.stats.today;
+        document.getElementById('stat-week').textContent = data.stats.week;
+        
+        // Update Stacked Trends
+        trendsChart.data.labels = data.labels.map(l => {
+            const d = new Date(l);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        
+        const colors = {
+            'Visitor': 'rgba(99, 102, 241, 0.8)',
+            'Vendor': 'rgba(139, 92, 246, 0.8)',
+            'Employee': 'rgba(236, 72, 153, 0.8)'
+        };
+        
+        trendsChart.data.datasets = data.stackedData.map(d => ({
+            label: d.label,
+            data: d.data,
+            backgroundColor: colors[d.label] || 'rgba(156, 163, 175, 0.8)'
+        }));
+        trendsChart.update();
+        
+        // Toggle Empty State for Trends
+        const hasTrendsData = data.stackedData.some(d => d.data.some(val => val > 0));
+        document.getElementById('noData-trends').style.display = hasTrendsData ? 'none' : 'block';
+        
+        // Update Heatmap
+        heatmapChart.data.datasets[0].data = data.hourlyData;
+        heatmapChart.update();
+        
+        // Toggle Empty State for Heatmap
+        const hasHeatmapData = data.hourlyData.some(val => val > 0);
+        document.getElementById('noData-heatmap').style.display = hasHeatmapData ? 'none' : 'block';
 
-// Peak Hours Chart
-const peakHoursCtx = document.getElementById('peakHoursChart').getContext('2d');
-new Chart(peakHoursCtx, {
-    type: 'bar',
-    data: {
-        labels: [<?php foreach($peakHours as $ph) echo ($ph['hour'] % 12 ?: 12) . ' ' . ($ph['hour'] < 12 ? 'AM' : 'PM') . ','; ?>],
-        datasets: [{
-            label: 'Pass Count',
-            data: [<?php foreach($peakHours as $ph) echo $ph['count'] . ','; ?>],
-            backgroundColor: 'rgba(139, 92, 246, 0.8)'
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: { precision: 0 }
-            }
-        }
+        // Update Category Doughnut
+        categoryChart.data.labels = data.stackedData.map(d => d.label);
+        categoryChart.data.datasets[0].data = data.stackedData.map(d => d.data.reduce((a, b) => a + b, 0));
+        categoryChart.data.datasets[0].backgroundColor = [
+            'rgba(99, 102, 241, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(236, 72, 153, 0.8)'
+        ];
+        categoryChart.update();
+        
+    } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
     }
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+    initCharts();
+    updateDashboard();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(updateDashboard, 30000);
 });
 </script>
 
